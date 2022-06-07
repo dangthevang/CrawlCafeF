@@ -1,4 +1,3 @@
-from email import header
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -7,6 +6,8 @@ import numpy as np
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
+import re
+
 pd.set_option('mode.chained_assignment', None)
 
 class setup():
@@ -21,12 +22,12 @@ class setup():
         self.driver = webdriver.Chrome(executable_path=path)
        
 
-    def request_link(self,link):
+    def request_link(self,link,time=5):
         try:
-            self.driver.set_page_load_timeout(5)
+            self.driver.set_page_load_timeout(time)
             self.driver.get(link)
         except:
-            self.request_link(link)
+            self.request_link(link,10)
 
     def format(self, time):
         s = time.split("-")
@@ -41,7 +42,9 @@ class setup():
                 EC.presence_of_element_located((By.XPATH, something))
             )
             element.click()
-        finally:
+        except:
+            self.driver.refresh()
+            self.click_something_by_xpath(something)
             pass
 
     def click_something_by_id(self, something):
@@ -50,7 +53,9 @@ class setup():
                 EC.presence_of_element_located((By.ID, something))
             )
             element.click()
-        finally:
+        except:
+            self.driver.refresh()
+            self.click_something_by_id(something)
             pass
 
 class ListCompany(setup):
@@ -121,6 +126,7 @@ class FinancailStatement(setup):
         self.request_link(self.link)
         self.clickBalance()
         return self.getData(times)
+
     def get_Income(self,symbol, year=2022,month=1,day=1, type_="Y", times=1):
         self.setup_link(symbol, year,month,day, type_)
         self.request_link(self.link)
@@ -144,7 +150,6 @@ class FinancailStatement(setup):
         while times != 0:
             times -= 1
             df1 = self.getTable()
-
             col_key = []
             for i in df1:
               if i in df.columns:
@@ -169,8 +174,9 @@ class FinancailStatement(setup):
         stt = 0
         dict_ = {}
         for i in df.index:
-          dict_[df["field"][i]] = 0
-
+            df["field"][i] = ''.join([i for i in df["field"][i] if not i.isdigit()])
+            dict_[df["field"][i]] = 0
+        
         for i in df.index:
           dict_[df["field"][i]]+=1
           df["field"][i] = df["field"][i]+"__"+str(dict_[df["field"][i]])
@@ -185,10 +191,10 @@ class FinancailStatement(setup):
             '//*[@id="tblGridData"]/tbody/tr/td[1]/div/a[2]')
 
     def clickBalance(self):
-        self.click_something_by_id("aNhom2")
+        self.click_something_by_id("aNhom1")
 
     def clickIncome(self):
-        self.click_something_by_id("aNhom1")
+        self.click_something_by_id("aNhom2")
 
     def clickCashFlowIndirect(self):
         self.click_something_by_id("aNhom3")
@@ -206,15 +212,101 @@ class FinancailStatement(setup):
         self.click_something_by_id("rdo2")
 
 class Volume(setup):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.link = "https://s.cafef.vn/"
+        # self.new = 
+    def setup_link(self, link):
+        self.link = self.link + link
+    def getVolumeNow(self,link):
+        self.setup_link(link)
+        self.request_link(self.link,5)
+        try:
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[6]/div[5]/div/ul'))
+            )
+        finally:
+            pass
+        soup = str(element.get_attribute('innerHTML'))
+        text = BeautifulSoup(soup, 'html.parser')
+        title = []
+        value = []
+        for i in text.find_all("div",{"class":"l"}):
+            title.append(i.b.text)
+        for i in text.find_all("div",{"class":"r"}):
+            value.append(i.text.replace("\r","").replace("\n","").replace(",","").replace("  ",''))
+        return pd.DataFrame({"Title":title,"Value":value})
+
+    def getVolumeNew(self,symbol):
+        self.request_link("https://s.cafef.vn/Ajax/Events_RelatedNews_New.aspx?symbol=*&floorID=0&configID=0&PageIndex=1&PageSize=1000&Type=2".replace("*",symbol),5)
+        self.driver.get(self.link)
+        text = BeautifulSoup(soup, 'html.parser')
 
 class Dividend(setup):
     def __init__(self):
         super().__init__()
-        self.link = "https://s.cafef.vn/*"
+        self.link = "https://s.cafef.vn/"
+        self.new = None
+
     def setup_link(self, link):
         # https://s.cafef.vn/hose/AAA-cong-ty-co-phan-nhua-an-phat-xanh.chn
-        self.link = self.link.replace("*",link)
+        self.link = self.link + link
+
+    def get_new(self,link):
+        self.setup_link(link)
+        self.request_link(self.link,10)
+        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+        t = soup.find_all("div",attrs={"class":"middle"})
+        t1 = t[0].text
+        self.new = t1.split("-")
+        return self.new
     
+    def FilterData(self,link):
+        list_ = []
+        self.get_new(link)
+        for new in self.new:
+            try:
+                day = re.search(r'(\d+/\d+/\d+)',new).group(1)
+                index_stock = new.find("Cổ tức bằng Cổ phiếu")
+                index_money = new.find("Cổ tức bằng Tiền")
+                scale,money = '-1','-1' 
+                if index_stock != -1:
+                    scale = re.search(r'(\d+:\d+)',new[index_stock:]).group(1)
+                if index_money != -1:
+                    money = re.search(r'([+-]?([0-9]*[.])?[0-9]+%)',new[index_money:]).group(1)
+                list_.append({"Time":day,"Stock":scale,"Money":money})
+            except:
+                continue
+        return pd.DataFrame.from_records(list_)
+
 class Close(setup):
     pass
+
+class Listed(setup):
+
+    def __init__(self):
+        super().__init__()
+        self.link = "https://s.cafef.vn/"
+        # self.new = 
+    def setup_link(self, link):
+        self.link = self.link + link
+
+    def getVolumeNow(self,link):
+        self.setup_link(link)
+        self.request_link(self.link,5)
+        try:
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[6]/div[5]/div/ul'))
+            )
+        finally:
+            pass
+        soup = str(element.get_attribute('innerHTML'))
+        text = BeautifulSoup(soup, 'html.parser')
+        title = []
+        value = []
+        for i in text.find_all("div",{"class":"l"}):
+            title.append(i.b.text)
+        for i in text.find_all("div",{"class":"r"}):
+            value.append(i.text.replace("\r","").replace("\n","").replace(",","").replace("  ",''))
+        return pd.DataFrame({"Title":title,"Value":value})
+    
