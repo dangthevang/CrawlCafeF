@@ -12,12 +12,24 @@ pd.set_option('mode.chained_assignment', None)
 
 class setup():
     def __init__(self) -> None:
-        self.reset_driver("C:/webdrive/chromedriver.exe")
         self.year = 0
         self.quater = 0
         self.day = 0
         self.symbol = ""
+        try:
+            self.reset_driver()
+        except:
+            self.reset_colab()
 
+    def reset_colab(self):
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        self.driver = webdriver.Chrome('chromedriver',chrome_options=chrome_options)
+
+    def reset_driver(self, path="C:/webdrive/chromedriver.exe"):
+        self.driver = webdriver.Chrome(executable_path=path)
     def reset_driver(self, path="C:/webdrive/chromedriver.exe"):
         self.driver = webdriver.Chrome(executable_path=path)
        
@@ -44,7 +56,6 @@ class setup():
             element.click()
         except:
             self.driver.refresh()
-            self.click_something_by_xpath(something)
             pass
 
     def click_something_by_id(self, something):
@@ -55,7 +66,6 @@ class setup():
             element.click()
         except:
             self.driver.refresh()
-            self.click_something_by_id(something)
             pass
 
 class ListCompany(setup):
@@ -107,7 +117,7 @@ class ListCompany(setup):
 class FinancailStatement(setup):
     def __init__(self):
         super().__init__()
-        self.link = "https://s.cafef.vn/bao-cao-tai-chinh/AAA/IncSta/2022/1/0/0/ket-qua-hoat-dong-kinh-doanh-cong-ty-co-phan-nhua-an-phat-xanh.chn"
+        self.link = "https://s.cafef.vn/bao-cao-tai-chinh/AAA/IncSta/2021/1/0/0/ket-qua-hoat-dong-kinh-doanh-cong-ty-co-phan-nhua-an-phat-xanh.chn"
         self.driver.get(self.link)
 
     def setup_link(self, symbol, year,month,day, type_):
@@ -119,27 +129,27 @@ class FinancailStatement(setup):
         else:
             pass
         self.link = self.link.replace(
-            "AAA", symbol).replace("2022/1/0/0", time)
+            "AAA", symbol).replace("2021/1/0/0", time)
 
-    def get_Balance(self,symbol, year=2022,month=1,day=1, type_="Y", times=1):
+    def get_Balance(self,symbol, year=2021,month=1,day=1, type_="Y", times=1):
         self.setup_link(symbol, year,month,day, type_)
         self.request_link(self.link)
         self.clickBalance()
         return self.getData(times)
 
-    def get_Income(self,symbol, year=2022,month=1,day=1, type_="Y", times=1):
+    def get_Income(self,symbol, year=2021,month=1,day=1, type_="Y", times=1):
         self.setup_link(symbol, year,month,day, type_)
         self.request_link(self.link)
         self.clickIncome()
         return self.getData(times)
     
-    def get_CashFlowIndirect(self,symbol, year=2022,month=1,day=1, type_="Y", times=1):
+    def get_CashFlowIndirect(self,symbol, year=2021,month=1,day=1, type_="Y", times=1):
         self.setup_link(symbol, year,month,day, type_)
         self.request_link(self.link)
         self.clickCashFlowIndirect()
         return self.getData(times)
     
-    def get_CashFlowDirect(self,symbol, year=2022,month=1,day=1, type_="Y", times=1):
+    def get_CashFlowDirect(self,symbol, year=2021,month=1,day=1, type_="Y", times=1):
         self.setup_link(symbol, year,month,day, type_)
         self.request_link(self.link)
         self.clickCashFlowDirect()
@@ -154,8 +164,7 @@ class FinancailStatement(setup):
             for i in df1:
               if i in df.columns:
                 col_key.append(i)
-
-            df = pd.merge(df, df1, on=col_key, how="outer")
+            df = pd.merge(df, df1, on="field", how="outer")
             self.clickPerious()
         return df
 
