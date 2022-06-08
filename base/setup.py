@@ -16,6 +16,7 @@ class setup():
         self.quater = 0
         self.day = 0
         self.symbol = ""
+        self.List_error=[]
         try:
             self.reset_driver()
         except:
@@ -30,9 +31,6 @@ class setup():
 
     def reset_driver(self, path="C:/webdrive/chromedriver.exe"):
         self.driver = webdriver.Chrome(executable_path=path)
-    def reset_driver(self, path="C:/webdrive/chromedriver.exe"):
-        self.driver = webdriver.Chrome(executable_path=path)
-       
 
     def request_link(self,link,time=5):
         try:
@@ -292,7 +290,6 @@ class Close(setup):
     pass
 
 class Listed(setup):
-
     def __init__(self):
         super().__init__()
         self.link = "https://s.cafef.vn/"
@@ -300,22 +297,44 @@ class Listed(setup):
     def setup_link(self, link):
         self.link = self.link + link
 
-    def getVolumeNow(self,link):
+    def List_Delist_Exchange_Past(self,symbol,link):
         self.setup_link(link)
         self.request_link(self.link,5)
         try:
             element = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[6]/div[5]/div/ul'))
+                EC.presence_of_element_located((By.XPATH,'//*[@id="ctl00_ContentPlaceHolder1_ucTradeInfoV3_divFirstInfo"]/span'))
             )
-        finally:
-            pass
+        except:
+            self.List_error.append(symbol)
         soup = str(element.get_attribute('innerHTML'))
         text = BeautifulSoup(soup, 'html.parser')
-        title = []
-        value = []
-        for i in text.find_all("div",{"class":"l"}):
-            title.append(i.b.text)
-        for i in text.find_all("div",{"class":"r"}):
-            value.append(i.text.replace("\r","").replace("\n","").replace(",","").replace("  ",''))
-        return pd.DataFrame({"Title":title,"Value":value})
-    
+        t = text.find("table")
+        table = pd.read_html(str(t),displayed_only=False)[0]
+        table = table.rename(columns={0:"Field",1:"Value"})
+        return table
+    def List_Delist_Exchange_Now(self,symbol,link):
+        list_key = ["Khối lượng cổ phiếu niêm yết lần đầu:",'Giá đóng cửa phiên GD đầu tiên(nghìn đồng):','Ngày giao dịch đầu tiên:']
+        self.setup_link(link)
+        self.request_link(self.link,5)
+        try:
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[6]/div[3]/div'))
+            )
+        except:
+            self.List_error.append(symbol)
+        soup = str(element.get_attribute('innerHTML'))
+        text = BeautifulSoup(soup, 'html.parser')
+        new = text.find_all("div")
+        arr_list = []
+        for i in new:
+            for key in list_key:
+                arr = [text for text in i.stripped_strings]
+                if key in arr:
+                    dict_ = {"Field":arr[0],
+                                "Value":arr[1] }
+                    arr_list.append(dict_)
+        return pd.DataFrame.from_records(arr_list)
+    def List_Listed_Delisted(self,symbol,link):
+        a = self.List_Delist_Exchange_Now(symbol,link)
+        b = self.List_Delist_Exchange_Past(symbol,link)
+        return pd.concat([b,a],ignore_index=True)
