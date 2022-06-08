@@ -43,7 +43,12 @@ def LayDanhSachCongTy():
 def lay_delisted(symbol,link):
   web = F.Listed()
   print(web.List_Listed_Delisted(symbol,link))
-lay_delisted("QBS","/hose/QBS-cong-ty-co-phan-xuat-nhap-khau-quang-binh.chn")
+
+def lay_volume(symbol,link):
+  web = F.Volume()
+  print(web.getVolumeEvent(symbol))
+
+lay_volume("QBS","/hose/QBS-cong-ty-co-phan-xuat-nhap-khau-quang-binh.chn")
 # def multip():
 #     data = pd.read_csv("all.csv")
 #     data2 = pd.read_excel("List_Com_First (1_4).xlsx",engine="openpyxl")

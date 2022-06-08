@@ -244,11 +244,16 @@ class Volume(setup):
             value.append(i.text.replace("\r","").replace("\n","").replace(",","").replace("  ",''))
         return pd.DataFrame({"Title":title,"Value":value})
 
-    def getVolumeNew(self,symbol):
+    def getVolumeEvent(self,symbol):
         self.request_link("https://s.cafef.vn/Ajax/Events_RelatedNews_New.aspx?symbol=*&floorID=0&configID=0&PageIndex=1&PageSize=1000&Type=2".replace("*",symbol),5)
-        self.driver.get(self.link)
-        text = BeautifulSoup(soup, 'html.parser')
+        text = BeautifulSoup(self.driver.page_source, 'html.parser')
+        event = text.find_all("li")
+        list_ = []
+        for i in event:
+            list_.append({"Time":i.span.text,"Event":i.a.text,"Link":i.a["href"]})
+        return pd.DataFrame.from_records(list_)
 
+        
 class Dividend(setup):
     def __init__(self):
         super().__init__()
