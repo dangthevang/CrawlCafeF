@@ -18,7 +18,7 @@ def KeoBaoCaoTaiChinh(symbol):
   df = df.append(c,ignore_index=True)
   d = web.get_CashFlowDirect(symbol,year=2021,times=time,type_="Y")
   df = df.append(d,ignore_index=True)
-  df.to_csv("Data/Financial/"+symbol+".csv",index=False)
+  df.to_csv(symbol+".csv",index=False)
   print(symbol,df.columns)
   # web.driver.close()
 def KeoCoTuc(symbol,link):
@@ -48,7 +48,7 @@ def lay_volume(symbol,link):
   web = F.Volume()
   print(web.getVolumeEvent(symbol))
 
-lay_volume("QBS","/hose/QBS-cong-ty-co-phan-xuat-nhap-khau-quang-binh.chn")
+KeoBaoCaoTaiChinh("QBS")
 # def multip():
 #     data = pd.read_csv("all.csv")
 #     data2 = pd.read_excel("List_Com_First (1_4).xlsx",engine="openpyxl")

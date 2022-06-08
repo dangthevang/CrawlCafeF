@@ -162,7 +162,7 @@ class FinancailStatement(setup):
             for i in df1:
               if i in df.columns:
                 col_key.append(i)
-            df = pd.merge(df, df1, on="field", how="outer")
+            df = pd.merge(df, df1, on=col_key, how="outer")
             self.clickPerious()
         return df
 
@@ -253,7 +253,7 @@ class Volume(setup):
             list_.append({"Time":i.span.text,"Event":i.a.text,"Link":i.a["href"]})
         return pd.DataFrame.from_records(list_)
 
-        
+
 class Dividend(setup):
     def __init__(self):
         super().__init__()
@@ -340,6 +340,12 @@ class Listed(setup):
                     arr_list.append(dict_)
         return pd.DataFrame.from_records(arr_list)
     def List_Listed_Delisted(self,symbol,link):
-        a = self.List_Delist_Exchange_Now(symbol,link)
-        b = self.List_Delist_Exchange_Past(symbol,link)
+        try:
+            a = self.List_Delist_Exchange_Now(symbol,link)
+        except:
+            a = pd.DataFrame({})
+        try:
+            b = self.List_Delist_Exchange_Past(symbol,link)
+        except:
+            b = pd.DataFrame({})
         return pd.concat([b,a],ignore_index=True)
