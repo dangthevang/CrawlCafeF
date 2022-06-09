@@ -47,8 +47,10 @@ def lay_delisted(symbol,link):
 def lay_volume(symbol,link):
   web = F.Volume()
   print(web.getVolumeEvent(symbol))
-
-KeoBaoCaoTaiChinh("QBS")
+def close(symbol):
+  web=F.Close(symbol=symbol)
+  return web.DownloadClose()
+close("AAM").to_csv("AAM.csv")
 # def multip():
 #     data = pd.read_csv("all.csv")
 #     data2 = pd.read_excel("List_Com_First (1_4).xlsx",engine="openpyxl")

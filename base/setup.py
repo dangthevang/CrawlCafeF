@@ -7,7 +7,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 import re
-
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 pd.set_option('mode.chained_assignment', None)
 
 class setup():
@@ -291,8 +293,67 @@ class Dividend(setup):
                 continue
         return pd.DataFrame.from_records(list_)
 
-class Close(setup):
-    pass
+class Close():
+    
+    def __init__(self,symbol="AAA",start='01/01/2000',end='09/06/2022'):
+        super().__init__()
+        self.URL_CAFE_CLOSE = "https://s.cafef.vn/Lich-su-giao-dich-AAA-1.chn#data".replace("AAA",symbol)
+        self.URL_CAFE_FUND = "https://s.cafef.vn/Lich-su-giao-dich-AAA-5.chn#data".replace("AAA",symbol)
+        self.HEADERS = {'content-type': 'application/x-www-form-urlencoded', 'User-Agent': 'Mozilla'}
+        self.start = '01/01/2005'
+        self.end = '08/06/2022'
+        self.symbol=symbol
+    
+    def fix_date(self,start,end):
+        self.start = start
+        self.end = end
+    
+    def DownloadClose(self):
+        return self.download_one_close()
+
+    def DownloadCloseFund(self):
+        return self.download_one_fund()
+
+    def download_batch(self,id_batch,url):
+        form_data = {'ctl00$ContentPlaceHolder1$scriptmanager':'ctl00$ContentPlaceHolder1$ctl03$panelAjax|ctl00$ContentPlaceHolder1$ctl03$pager1',
+                       'ctl00$ContentPlaceHolder1$ctl03$txtKeyword':self.symbol,
+                       'ctl00$ContentPlaceHolder1$ctl03$dpkTradeDate1$txtDatePicker':self.start,
+                       'ctl00$ContentPlaceHolder1$ctl03$dpkTradeDate2$txtDatePicker':self.end,
+                       '__EVENTTARGET':'ctl00$ContentPlaceHolder1$ctl03$pager1',
+                       '__EVENTARGUMENT':id_batch,
+                       '__ASYNCPOST':'true'}
+        rs = requests.post(url, data = form_data, headers = self.HEADERS, verify=False)
+        soup = BeautifulSoup(rs.content, 'html.parser')
+        table = soup.find('table')
+        stock_slice_batch = pd.read_html(str(table))[0]
+        stock_slice_batch = stock_slice_batch.rename(columns=stock_slice_batch.iloc[0])
+        try:
+            stock_slice_batch = stock_slice_batch.drop([stock_slice_batch.index[0],stock_slice_batch.index[1]])
+        except:
+            stock_slice_batch = stock_slice_batch.drop(stock_slice_batch.index[0])
+        return stock_slice_batch
+
+    def download_one_close(self):
+        stock_data = pd.DataFrame({})
+        for i in range(1000):
+            stock_slice_batch = self.download_batch(i + 1, self.URL_CAFE_CLOSE)
+            stock_data = pd.concat([stock_data, stock_slice_batch], axis=0)
+            try:
+                date_end_batch = stock_slice_batch["Ngày"].values[-1]
+            except:
+                break
+        return stock_data
+    def download_one_fund(self):
+        stock_data = pd.DataFrame({})
+        for i in range(1000):
+            stock_slice_batch = self.download_batch(i + 1, self.URL_CAFE_FUND)
+            stock_data = pd.concat([stock_data, stock_slice_batch], axis=0)
+            try:
+                date_end_batch = stock_slice_batch["KLđăng ký"].values[-1]
+            except:
+                break
+        return stock_data
+
 
 class Listed(setup):
     def __init__(self):
