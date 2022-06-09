@@ -182,13 +182,13 @@ class FinancailStatement(setup):
                                 4:time})
         stt = 0
         dict_ = {}
-        for i in df.index:
-            df["field"][i] = ''.join([i for i in df["field"][i] if not i.isdigit()])
-            dict_[df["field"][i]] = 0
+        # for i in df.index:
+        #     df["field"][i] = ''.join([i for i in df["field"][i] if not i.isdigit()])
+        #     dict_[df["field"][i]] = 0
         
-        for i in df.index:
-          dict_[df["field"][i]]+=1
-          df["field"][i] = df["field"][i]+"__"+str(dict_[df["field"][i]])
+        # for i in df.index:
+        #   dict_[df["field"][i]]+=1
+        #   df["field"][i] = df["field"][i]+"__"+str(dict_[df["field"][i]])
         return df
 
     def clickPerious(self):
