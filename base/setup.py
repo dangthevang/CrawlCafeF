@@ -247,7 +247,7 @@ class Volume(setup):
         return pd.DataFrame({"Title":title,"Value":value})
 
     def getVolumeEvent(self,symbol):
-        self.request_link("https://s.cafef.vn/Ajax/Events_RelatedNews_New.aspx?symbol=*&floorID=0&configID=0&PageIndex=1&PageSize=1000&Type=2".replace("*",symbol),5)
+        self.request_link("https://s.cafef.vn/Ajax/Events_RelatedNews_New.aspx?symbol=*&floorID=0&configID=4&PageIndex=1&PageSize=1000&Type=2".replace("*",symbol),5)
         text = BeautifulSoup(self.driver.page_source, 'html.parser')
         event = text.find_all("li")
         list_ = []

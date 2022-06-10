@@ -41,29 +41,38 @@ def LayDanhSachCongTy():
 
 
 def lay_delisted(symbol,link):
-  web = F.Listed()
-  print(web.List_Listed_Delisted(symbol,link))
+  try:
+    df = pd.read_csv("data/"+symbol+".csv")
+  except:
+    print(symbol)
+    web = F.Listed()
+    web.List_Listed_Delisted(symbol,link).to_csv("data/"+symbol+".csv")
 
 def lay_volume(symbol,link):
   web = F.Volume()
   print(web.getVolumeEvent(symbol))
 def close(symbol):
-  web=F.Close(symbol=symbol)
-  return web.DownloadClose()
-close("AAM").to_csv("AAM.csv")
-# def multip():
-#     data = pd.read_csv("all.csv")
-#     data2 = pd.read_excel("List_Com_First (1_4).xlsx",engine="openpyxl")
-#     data = data2.merge(data,on="Symbol",how="left")
-#     Symbol = data["Symbol"][0:500]
-#     Link = data["Link"][0:500]
-#     # Symbol = ["A32"]
-#     pool = multiprocessing.Pool(processes=2)
-#     for symbol in range(len(Symbol)):
-#       pool.apply_async(run1,args=(Symbol[symbol],))
-#     pool.close()
-#     pool.join()
+  try:
+    df = pd.read_csv("data/"+symbol+".csv")
+  except:
+    print(symbol)
+    web=F.Close(symbol=symbol)
+    return web.DownloadClose()
+# close("AAA")
+def multip():
+    data = pd.read_csv("TatCaCongTy.csv")
+    # ,engine="openpyxl"
+    data2 = pd.read_csv("AllCompanyDone_(1).csv")
+    data = data2.merge(data,on="Symbol",how="left")
+    Symbol = data["Symbol"][0:]
+    Link = data["Link"][0:]
+    # Symbol = ["A32"]
+    pool = multiprocessing.Pool(processes=2)
+    for symbol in range(len(Symbol)):
+      pool.apply_async(lay_delisted,args=(Symbol[symbol],Link[symbol],))
+    pool.close()
+    pool.join()
 
-# if __name__ == '__main__':
-#     multip()
+if __name__ == '__main__':
+    multip()
       
