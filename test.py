@@ -8,18 +8,15 @@ import multiprocessing
 def KeoBaoCaoTaiChinh(symbol):
   time = 20
   web = F.FinancailStatement()
-  df = pd.DataFrame({})
   # t = web.getTable('hose/FCN-cong-ty-co-phan-fecon.chn')
   i = web.get_Income(symbol,year=2021,times=time,type_="Y")
-  df = df.append(i,ignore_index=True)
+  print(i)
   b = web.get_Balance(symbol,year=2021,times=time,type_="Y")
-  df = df.append(b,ignore_index=True)
+  print(b)
   c = web.get_CashFlowIndirect(symbol,year=2021,times=time,type_="Y")
-  df = df.append(c,ignore_index=True)
+  print(c)
   d = web.get_CashFlowDirect(symbol,year=2021,times=time,type_="Y")
-  df = df.append(d,ignore_index=True)
-  df.to_csv(symbol+".csv",index=False)
-  print(symbol,df.columns)
+  print(d)
   # web.driver.close()
 def KeoCoTuc(symbol,link):
   web = F.Dividend()
@@ -58,21 +55,28 @@ def close(symbol):
     print(symbol)
     web=F.Close(symbol=symbol)
     return web.DownloadClose()
-# close("AAA")
-def multip():
-    data = pd.read_csv("TatCaCongTy.csv")
-    # ,engine="openpyxl"
-    data2 = pd.read_csv("AllCompanyDone_(1).csv")
-    data = data2.merge(data,on="Symbol",how="left")
-    Symbol = data["Symbol"][0:]
-    Link = data["Link"][0:]
-    # Symbol = ["A32"]
-    pool = multiprocessing.Pool(processes=2)
-    for symbol in range(len(Symbol)):
-      pool.apply_async(lay_delisted,args=(Symbol[symbol],Link[symbol],))
-    pool.close()
-    pool.join()
+def close(symbol):
+  try:
+    df = pd.read_csv(symbol+".csv")
+  except:
+    web=F.Close(symbol=symbol)
+    return web.DownloadCloseFund()
+KeoBaoCaoTaiChinh("AAA")
+# close("AAA").to_csv("haha.csv")
+# def multip():
+#     data = pd.read_csv("TatCaCongTy.csv")
+#     # ,engine="openpyxl"
+#     data2 = pd.read_csv("AllCompanyDone_(1).csv")
+#     data = data2.merge(data,on="Symbol",how="left")
+#     Symbol = data["Symbol"][0:]
+#     Link = data["Link"][0:]
+#     # Symbol = ["A32"]
+#     pool = multiprocessing.Pool(processes=2)
+#     for symbol in range(len(Symbol)):
+#       pool.apply_async(lay_delisted,args=(Symbol[symbol],Link[symbol],))
+#     pool.close()
+#     pool.join()
 
-if __name__ == '__main__':
-    multip()
+# if __name__ == '__main__':
+#     multip()
       

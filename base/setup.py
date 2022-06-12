@@ -155,16 +155,12 @@ class FinancailStatement(setup):
         self.clickCashFlowDirect()
         return self.getData(times)
     
-    def getData(self,  times=1):
-        df = pd.DataFrame({"field": []})
+    def getData(self, times):
+        df = {}
         while times != 0:
             times -= 1
             df1 = self.getTable()
-            col_key = []
-            for i in df1:
-              if i in df.columns:
-                col_key.append(i)
-            df = pd.merge(df, df1, on=col_key, how="outer")
+            df[df1.columns[1]] = df1.to_dict('records')
             self.clickPerious()
         return df
 
@@ -180,15 +176,6 @@ class FinancailStatement(setup):
         df = df.dropna(subset=[0])
         df = df.rename(columns={0:"field",
                                 4:time})
-        stt = 0
-        dict_ = {}
-        # for i in df.index:
-        #     df["field"][i] = ''.join([i for i in df["field"][i] if not i.isdigit()])
-        #     dict_[df["field"][i]] = 0
-        
-        # for i in df.index:
-        #   dict_[df["field"][i]]+=1
-        #   df["field"][i] = df["field"][i]+"__"+str(dict_[df["field"][i]])
         return df
 
     def clickPerious(self):
