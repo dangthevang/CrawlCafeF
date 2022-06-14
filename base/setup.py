@@ -221,6 +221,10 @@ class Volume(setup):
             element = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[6]/div[5]/div/ul'))
             )
+        except:
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[5]/div[5]/div/ul'))
+            )
         finally:
             pass
         soup = str(element.get_attribute('innerHTML'))
