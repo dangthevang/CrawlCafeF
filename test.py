@@ -61,7 +61,16 @@ def close(symbol):
   except:
     web=F.Close(symbol=symbol)
     return web.DownloadCloseFund()
-KeoBaoCaoTaiChinh("AAA")
+def infor(symbol,link):
+  web = F.Listed()
+  web.List_Listed_Delisted(symbol,link).to_csv("haha.csv")
+infor("NKD",'hose/NKD-cong-ty-co-phan-che-bien-thuc-pham-kinh-do-mien-bac.chn')
+# KeoBaoCaoTaiChinh("AAA")
+# symbol="CLM"
+# time = 22
+# web = F.FinancailStatement()
+# i = web.get_Income(symbol,year=2021,times=time,type_="Y")
+# print(i)
 # close("AAA").to_csv("haha.csv")
 # def multip():
 #     data = pd.read_csv("TatCaCongTy.csv")

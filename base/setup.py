@@ -378,7 +378,9 @@ class Listed(setup):
                 EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[6]/div[3]/div'))
             )
         except:
-            self.List_error.append(symbol)
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH,'//*[@id="content"]/div/div[5]/div[3]/div'))
+            )
         soup = str(element.get_attribute('innerHTML'))
         text = BeautifulSoup(soup, 'html.parser')
         new = text.find_all("div")
