@@ -6,16 +6,16 @@ import pandas as pd
 import multiprocessing
 
 def KeoBaoCaoTaiChinh(symbol):
-  time = 20
+  time = 90
   web = F.FinancailStatement()
   # t = web.getTable('hose/FCN-cong-ty-co-phan-fecon.chn')
-  i = web.get_Income(symbol,year=2021,times=time,type_="Y")
+  i = web.get_Income(symbol,year=2022,times=time,type_="Q")
   print(i)
-  b = web.get_Balance(symbol,year=2021,times=time,type_="Y")
+  b = web.get_Balance(symbol,year=2022,times=time,type_="Q")
   print(b)
-  c = web.get_CashFlowIndirect(symbol,year=2021,times=time,type_="Y")
+  c = web.get_CashFlowIndirect(symbol,year=2022,times=time,type_="Q")
   print(c)
-  d = web.get_CashFlowDirect(symbol,year=2021,times=time,type_="Y")
+  d = web.get_CashFlowDirect(symbol,year=2022,times=time,type_="Q")
   print(d)
   # web.driver.close()
 def KeoCoTuc(symbol,link):
@@ -64,7 +64,8 @@ def close(symbol):
 def infor(symbol,link):
   web = F.Listed()
   web.List_Listed_Delisted(symbol,link).to_csv("haha.csv")
-infor("NKD",'hose/NKD-cong-ty-co-phan-che-bien-thuc-pham-kinh-do-mien-bac.chn')
+KeoBaoCaoTaiChinh("AAA")
+# infor("NKD",'hose/NKD-cong-ty-co-phan-che-bien-thuc-pham-kinh-do-mien-bac.chn')
 # KeoBaoCaoTaiChinh("AAA")
 # symbol="CLM"
 # time = 22
