@@ -26,7 +26,7 @@ class setup():
 
     def reset_colab(self):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.addArguments("start-maximized")
+        # chrome_options.addArguments("start-maximized")
         chrome_options.addArguments("enable-automation")
         chrome_options.addArguments("--headless")
         chrome_options.addArguments("--no-sandbox")
