@@ -26,13 +26,13 @@ class setup():
 
     def reset_colab(self):
         chrome_options = webdriver.ChromeOptions()
-        # chrome_options.addArguments("start-maximized")
-        chrome_options.addArguments("enable-automation")
-        chrome_options.addArguments("--headless")
-        chrome_options.addArguments("--no-sandbox")
-        chrome_options.addArguments("--disable-dev-shm-usage")
-        chrome_options.addArguments("--disable-browser-side-navigation")
-        chrome_options.addArguments("--disable-gpu")
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--start-maximized')
+        chrome_options.add_argument('enable-automation')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-browser-side-navigation')
+        chrome_options.add_argument('--disable-gpu')
         self.driver = webdriver.Chrome('chromedriver',chrome_options=chrome_options)
 
     def reset_driver(self, path="C:/webdrive/chromedriver.exe"):
